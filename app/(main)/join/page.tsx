@@ -1,4 +1,4 @@
-import { JoinGame } from "@/components/quiz"
+import JoinGame from "@/components/join-game"
 
 export default function Page() {
   return (

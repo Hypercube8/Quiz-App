@@ -23,14 +23,28 @@ interface Player {
 
 const players: Player[] = [];
 
+io.use((socket, next) => {
+    const roomCode = socket.handshake.auth.roomCode;
+
+    if (roomCode === "123456") {
+        next();
+    } else {
+        next(new Error("Room code is invalid."));
+    }
+})
+
 io.on("connection", (socket) => {
     console.log(socket.id);
+});
+
+io.on("join", () => {
     players.push({
         name: "John",
         email: "Rando",
     })
+    alert("jpon");
     io.emit("game:init", players);
-});
+})
 
 server.listen(3001, () => {
     console.log("Sever running on http://localhost:3001");

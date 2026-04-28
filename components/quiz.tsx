@@ -200,38 +200,6 @@ export function QuizLeaderboard({leaders}: QuizLeaderboardProps) {
     );
 }
 
-export function JoinGame() {
-    const [otpValue, setOTPValue] = React.useState("");
-
-    function changeOTPValue(value: string) {
-        setOTPValue(value.toUpperCase());
-    }
-
-    return (
-        <div className="flex flex-col gap-4 items-center justify-center">
-            <h1 className="text-5xl p-8">Enter a code to join:</h1>
-            <div className="flex gap-4">
-                <InputOTP maxLength={6} pattern={REGEXP_ONLY_DIGITS_AND_CHARS} value={otpValue} onChange={(value) => changeOTPValue(value)}>
-                    <InputOTPGroup>
-                        <InputOTPSlot className="p-8 text-3xl" index={0} />
-                        <InputOTPSlot className="p-8 text-3xl" index={1} />
-                        <InputOTPSlot className="p-8 text-3xl" index={2} />
-                    </InputOTPGroup>
-                    <InputOTPSeparator />
-                    <InputOTPGroup>
-                        <InputOTPSlot className="p-8 text-3xl" index={3} />
-                        <InputOTPSlot className="p-8 text-3xl" index={4} />
-                        <InputOTPSlot className="p-8 text-3xl" index={5} />
-                    </InputOTPGroup>
-                </InputOTP>
-                <Button size="icon-lg" className="rounded-full p-8" asChild>
-                    <Link href={`/play?game=${otpValue}`}><MoveRight className="size-12" /></Link>
-                </Button>
-            </div>
-        </div>
-    ); 
-}
-
 interface Player {
     name: string;
     email: string;
@@ -284,30 +252,3 @@ export function JoinBoard({host, players}: JoinBoardProps) {
     );
 }
 
-interface QuizGameState {
-    player: Player;
-    players: Player[];
-}
-
-
-export function QuizGame() {
-    const [gameState, setGameState] = React.useState<Partial<QuizGameState>>({});
-    const socket = React.useRef<Socket | null>(null);
-
-    React.useEffect(() => {
-        socket.current = io("ws://localhost:3001");
-
-        socket.current.on("game:init", (players: Player[]) => {
-            setGameState(state => {
-                return {
-                    ...state,
-                    players
-                }
-            });
-        })  
-    }, []);
-
-    return (
-        <JoinBoard players={gameState.players ?? []} />
-    );
-}
