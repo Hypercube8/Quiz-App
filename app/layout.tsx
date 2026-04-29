@@ -4,7 +4,6 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils";
 import AppNavbar from "@/components/app-navbar";
-import SocketProvider from "@/components/socket-provider";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'})
 
@@ -26,9 +25,7 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <SocketProvider>
-            {children}
-          </SocketProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>

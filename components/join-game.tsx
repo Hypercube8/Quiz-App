@@ -12,14 +12,14 @@ import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import useSocket from "@/hooks/use-socket";
 import { useRouter } from "next/navigation";
 import StateMachine from "./state-machine";
 import { Input } from "@/components/ui/input";
 import { useGameStore } from "@/hooks/stores/game-store";
+import { game } from "@/src/game";
+import { useSocketStore } from "@/hooks/stores/socket-store";
 
 export default function JoinGame() {
-    const { connect, connected, error } = useSocket()!;
     const router = useRouter();
 
     const [otpValue, setOTPValue] = useState("");
@@ -27,6 +27,8 @@ export default function JoinGame() {
 
     const [invalid, setInvalid] = useState(false);
 
+    const connected = useSocketStore((s) => s.connected);
+    const error = useSocketStore((s) => s.error);
     const setUser = useGameStore((s) => s.setUser);
 
     function changeOTPValue(value: string) {
@@ -40,7 +42,7 @@ export default function JoinGame() {
             email: "rando"
         });
 
-        connect({
+        game.connect({
             roomCode: otpValue,
             username: nameValue
         });
