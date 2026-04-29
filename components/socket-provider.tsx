@@ -4,12 +4,12 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { socket } from "../src/socket";
 
-export interface SocketState {
+interface SocketState {
     socket: Socket;
     connected: boolean;
     connecting: boolean;
     error: Error | null;
-    connectWithAuth: (credentials: any) => void; 
+    connect: (auth: any) => void; 
 }
 
 export const SocketContext = createContext<SocketState | null>(null);
@@ -19,8 +19,8 @@ export default function SocketProvider({children}: React.PropsWithChildren) {
     const [connecting, setConnecting] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
-    function connectWithAuth(credentials: any) {
-        socket.auth = credentials;
+    function connect(auth: any) {
+        socket.auth = auth; 
         setConnecting(true);
         setError(null);
         socket.connect();
@@ -62,7 +62,7 @@ export default function SocketProvider({children}: React.PropsWithChildren) {
                 connected,
                 connecting,
                 error,
-                connectWithAuth            
+                connect,         
             }
         }>
             {children}

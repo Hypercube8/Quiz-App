@@ -10,18 +10,24 @@ import {
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { Button } from "@/components/ui/button";
 import { MoveRight } from "lucide-react";
-import { socket } from "../src/socket";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import useSocket from "@/hooks/use-socket";
 import { useRouter } from "next/navigation";
+import StateMachine from "./state-machine";
+import { Input } from "@/components/ui/input";
+import { useGameStore } from "@/hooks/stores/game-store";
 
 export default function JoinGame() {
-    const { connectWithAuth, connected, error } = useSocket()!;
+    const { connect, connected, error } = useSocket()!;
     const router = useRouter();
 
     const [otpValue, setOTPValue] = useState("");
+    const [nameValue, setNameValue] = useState("");
+
     const [invalid, setInvalid] = useState(false);
+
+    const setUser = useGameStore((s) => s.setUser);
 
     function changeOTPValue(value: string) {
         setOTPValue(value.toUpperCase());
@@ -29,8 +35,14 @@ export default function JoinGame() {
     }
 
     function join() {
-        connectWithAuth({
+        setUser({
+            name: nameValue,
+            email: "rando"
+        });
+
+        connect({
             roomCode: otpValue,
+            username: nameValue
         });
     }
 
@@ -62,6 +74,7 @@ export default function JoinGame() {
                         <InputOTPSlot className="p-8 text-3xl" index={5} aria-invalid={invalid} />
                     </InputOTPGroup>
                 </InputOTP>
+                <Input placeholder="Enter your username" type="text" value={nameValue} onChange={(event) => setNameValue(event.target.value)} />
                 <Button size="icon-lg" className="rounded-full p-8" onClick={join} asChild>
                     <MoveRight className="size-12" />
                 </Button>

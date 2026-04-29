@@ -1,31 +1,34 @@
 "use client";
 
+import Player from "@/common/player";
 import useSocket from "@/hooks/use-socket";
-import { useEffect, useState } from "react";
-import { JoinBoard } from "./quiz";
-
-interface Player {
-    name: string;
-    email: string;
-    avatar?: string;
-}
+import { useEffect, useRef, useState } from "react";
+import JoinBoard from "./join-board";
+import { useGameStore } from "@/hooks/stores/game-store";
+import { shallow } from "zustand/shallow";
 
 export default function QuizGame() {
     const { socket, connected } = useSocket()!;
     
-    const [players, setPlayers] = useState<Player[]>([]);
+    const user = useGameStore((s) => s.user);
+    const players = useGameStore((s) => s.players);
+    const setPlayers = useGameStore((s) => s.setPlayers);
+
+    const hasJoined = useRef(false);
 
     useEffect(() => {
         if (!connected) { return; }
 
         function handleInit(players: Player[]) {
-            alert(players);
             setPlayers(players);
         }
 
         socket.on("game:init", handleInit);  
 
-        socket.emit("join");
+        if (!hasJoined.current) {
+            socket.emit("join");
+            hasJoined.current = true;
+        }
 
         return () => {
             socket.off("game:init", handleInit);
@@ -33,6 +36,6 @@ export default function QuizGame() {
     }, [connected]);
 
     return (
-        <JoinBoard players={players} />
+        <JoinBoard user={user!} players={players} />
     );
 }

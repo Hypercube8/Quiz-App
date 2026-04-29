@@ -27,6 +27,10 @@ io.use((socket, next) => {
     const roomCode = socket.handshake.auth.roomCode;
 
     if (roomCode === "123456") {
+        players.push({
+            name: socket.handshake.auth.username,
+            email: "Rando",
+        })
         next();
     } else {
         next(new Error("Room code is invalid."));
@@ -34,17 +38,13 @@ io.use((socket, next) => {
 })
 
 io.on("connection", (socket) => {
-    console.log(socket.id);
-});
-
-io.on("join", () => {
-    players.push({
-        name: "John",
-        email: "Rando",
-    })
-    alert("jpon");
     io.emit("game:init", players);
-})
+    
+    socket.on("join", () => {
+
+        //io.emit("game:init", players);
+    })
+});
 
 server.listen(3001, () => {
     console.log("Sever running on http://localhost:3001");
