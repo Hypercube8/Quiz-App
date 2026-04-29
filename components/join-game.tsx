@@ -15,9 +15,10 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import StateMachine from "./state-machine";
 import { Input } from "@/components/ui/input";
-import { useGameStore } from "@/hooks/stores/game-store";
 import { game } from "@/src/game";
-import { useSocketStore } from "@/hooks/stores/socket-store";
+import { useStore } from "zustand";
+import { socketStore } from "@/stores/socket-store";
+import { gameStore } from "@/stores/game-store";
 
 export default function JoinGame() {
     const router = useRouter();
@@ -27,9 +28,9 @@ export default function JoinGame() {
 
     const [invalid, setInvalid] = useState(false);
 
-    const connected = useSocketStore((s) => s.connected);
-    const error = useSocketStore((s) => s.error);
-    const setUser = useGameStore((s) => s.setUser);
+    const connected = useStore(socketStore, (s) => s.connected);
+    const error = useStore(socketStore, (s) => s.error);
+    const setUser = useStore(gameStore, (s) => s.setUser);
 
     function changeOTPValue(value: string) {
         setOTPValue(value.toUpperCase());

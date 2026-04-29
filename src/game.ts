@@ -1,4 +1,4 @@
-import { GameStore, useGameStore } from "@/hooks/stores/game-store";
+import { GameStore, gameStore } from "@/stores/game-store";
 import { socket, SocketConnection } from "./socket";
 import Player from "@/common/player";
 
@@ -14,10 +14,8 @@ export class Game {
     }
 
     handleInit(players: Player[]) {
-        this.store.setState({
-            players
-        });
+        this.store.getState().setPlayers(players);
     }
 }
 
-export const game = new Game(useGameStore, socket);
+export const game = new Game(gameStore, socket);

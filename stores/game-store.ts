@@ -1,5 +1,5 @@
 import Player from "@/common/player";
-import { create, StoreApi, UseBoundStore } from "zustand";
+import { createStore, StoreApi } from "zustand";
 
 type State = {
     user?: Player
@@ -11,9 +11,9 @@ type Actions = {
     setPlayers: (players: Player[]) => void
 }
 
-export type GameStore = UseBoundStore<StoreApi<State & Actions>>;
+export type GameStore = StoreApi<State & Actions>;
 
-export const useGameStore = create<State & Actions>((set) => ({
+export const gameStore: GameStore = createStore<State & Actions>((set) => ({
     user: undefined,
     players: [],
     setUser: (user) => set({ user }),
