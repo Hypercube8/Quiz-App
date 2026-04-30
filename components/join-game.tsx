@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import StateMachine from "./state-machine";
 import { Input } from "@/components/ui/input";
-import { game } from "@/src/game";
+import { game } from "@/lib/game";
 import { useStore } from "zustand";
 import { socketStore } from "@/stores/socket-store";
 import { gameStore } from "@/stores/game-store";

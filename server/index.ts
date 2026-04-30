@@ -27,10 +27,6 @@ io.use((socket, next) => {
     const roomCode = socket.handshake.auth.roomCode;
 
     if (roomCode === "123456") {
-        players.push({
-            name: socket.handshake.auth.username,
-            email: "Rando",
-        })
         next();
     } else {
         next(new Error("Room code is invalid."));
@@ -38,11 +34,18 @@ io.use((socket, next) => {
 })
 
 io.on("connection", (socket) => {
-    io.emit("game:init", players);
-    
-    socket.on("join", () => {
+    const player = {
+        name: socket.handshake.auth.username,
+        email: "Rando",
+    };
 
-        //io.emit("game:init", players);
+    socket.emit("game:init", players);
+    
+    players.push(player);
+    socket.broadcast.emit("game:playerJoined", player);
+
+    socket.on("disconnect", (reason) => {
+        socket.broadcast.emit("game:playerLeft", player);
     })
 });
 

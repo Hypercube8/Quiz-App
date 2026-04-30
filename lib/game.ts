@@ -9,12 +9,22 @@ export class Game {
 
     constructor(private store: GameStore, private connection: SocketConnection) {
         this.handleInit = this.handleInit.bind(this);
+        this.handlePlayerJoin = this.handlePlayerJoin.bind(this);
 
         this.connection.on("game:init", this.handleInit);
+        this.connection.on("game:playerJoined", this.handlePlayerJoin);
     }
 
-    handleInit(players: Player[]) {
+    private handleInit(players: Player[]) {  
         this.store.getState().setPlayers(players);
+    }
+
+    private handlePlayerJoin(player: Player) {
+        this.store.getState().addPlayer(player);
+    }
+
+    private handlePlayerLeft(player: Player) {
+        
     }
 }
 
