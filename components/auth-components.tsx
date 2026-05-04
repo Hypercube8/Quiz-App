@@ -1,35 +1,20 @@
-import { signIn, signOut } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import React from "react";
+import { signInProviderAction } from "@/lib/actions/sign-in";
+import { SignOutAction } from "@/lib/actions/sign-out";
 
-export function SignIn({ provider }: { provider?: string}) {
+export function SignInProvider({ provider, children }: React.PropsWithChildren<{ provider?: string }> ) {
     return (
-        <form
-            action={async () => {
-                "use server";
-                await signIn(provider);
-            }}
-        >
-            {" "}
-            <button className="bg-neutral-700 text-white p-2 rounded-md">
-                {" "}
-                // [!code ++] Sign In with {provider}
-            </button>{" "}
-        </form>
+        <Button variant="outline" className="w-full" onClick={async () => signInProviderAction(provider)}>
+            {children}
+        </Button>
     )
 }
 
-export function SignOut({ provider }: { provider?: string} ) {
+export function SignOut({ children }: React.PropsWithChildren) {
     return (
-        <form
-            action={async () => {
-                "use server";
-                await signOut();
-            }}
-        >
-            {" "}
-            <button className="bg-neutral-700 text-white p-2 rounded-md">
-                {" "}
-                // [!code ++] Sign Out
-            </button>{" "}
-        </form>
-    )
+        <Button type="button" variant="outline" className="w-full"onClick={async () => SignOutAction()}>
+            {children}
+        </Button>
+    );
 }

@@ -15,7 +15,7 @@ import Link from "next/link";
 
 export default function AppNavbar() {
     return (
-        <div className="flex p-2 mb-4 w-full h-full bg-sidebar border-b-2 border-b-sidebar-border">
+        <div className="flex p-2 mb-4 w-full bg-sidebar border-b-2 border-b-sidebar-border justify-between">
             <NavigationMenu>
                 <NavigationMenuList className="gap-3">
                     <NavigationMenuItem>
@@ -32,7 +32,7 @@ export default function AppNavbar() {
                 </NavigationMenuList>
                 <NavigationMenuIndicator />
             </NavigationMenu>
-            <NavigationMenu className="ml-auto">
+            <NavigationMenu>
                 <NavigationMenuList className="gap-3">
                     <NavigationMenuItem>
                         <ButtonGroup>

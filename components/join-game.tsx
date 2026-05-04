@@ -19,6 +19,7 @@ import { game } from "@/lib/game";
 import { useStore } from "zustand";
 import { socketStore } from "@/stores/socket-store";
 import { gameStore } from "@/stores/game-store";
+import { SignOut } from "./auth-components";
 
 export default function JoinGame() {
     const router = useRouter();
@@ -81,6 +82,7 @@ export default function JoinGame() {
                 <Button size="icon-lg" className="rounded-full p-8" onClick={join} asChild>
                     <MoveRight className="size-12" />
                 </Button>
+                <SignOut>Sign Out</SignOut>
             </div>
         </div>
     );
