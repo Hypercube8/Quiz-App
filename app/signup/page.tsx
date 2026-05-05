@@ -3,30 +3,38 @@
 import { Button } from "@/components/ui/button";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import signUpAction from "@/lib/actions/sign-up";
-import { LoginInfo, loginSchema } from "@/lib/login";
+import { signUpSchema, SignUpInfo } from "@/lib/schema";
 import { Spinner } from "@/components/ui/spinner";
 
+import { signUp } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
 export default function page() {
-    const form = useForm<LoginInfo>({
-        resolver: zodResolver(loginSchema),
+    const router = useRouter();
+    const form = useForm<SignUpInfo>({
+        resolver: zodResolver(signUpSchema),
         mode: "onSubmit",
         defaultValues: {
             email: "",
+            name: "",
             password: ""
         }
     })
 
-    async function onSubmit(data: LoginInfo) {
-        const result = await signUpAction(data);
+    async function onSubmit(data: SignUpInfo) {
+        const res = await signUp.email({
+            name: data.name,
+            email: data.email,
+            password: data.password,
+        });
 
-        if (result) {
-            form.setError("form", {
-                message: result.error
-            });
+        if (res.error) {
+            form.setError("form", { message: res.error.message || "Something went wrong." } );
+        } else {
+            router.push("/join");
         }
     }
 
@@ -35,9 +43,11 @@ export default function page() {
             <Card className="w-full max-w-sm">
                 <CardHeader>
                     <CardTitle>Sign Up</CardTitle>
-                    <p>{form.formState.errors.form?.message}</p>
+                    <CardDescription>
+                        {form.formState.errors.form && (<FieldError>{form.formState.errors.form.message}</FieldError>)}
+                    </CardDescription>
                 </CardHeader>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
+                <form onChange={() => form.clearErrors("form")} onSubmit={form.handleSubmit(onSubmit)}>
                     <CardContent>
                         <FieldSet>
                             <FieldGroup>
@@ -45,6 +55,15 @@ export default function page() {
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor="email">Email</FieldLabel>
                                         <Input {...field} aria-invalid={fieldState.invalid} type="text" autoComplete="off" name="email" id="email" placeholder="Enter an email" />
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )} />
+                                <Controller name="name" control={form.control} render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="name">Username</FieldLabel>
+                                        <Input {...field} aria-invalid={fieldState.invalid} type="text" autoComplete="off" name="name" id="name" placeholder="Enter a username" />
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />
                                         )}
@@ -62,12 +81,10 @@ export default function page() {
                             </FieldGroup>
                         </FieldSet>
                     </CardContent>
-                    <CardFooter className="flex flex-col gap-2">
                         <Button type="submit" className="w-full">
                             {form.formState.isLoading && (<Spinner />)}
                             Sign Up
                         </Button>
-                    </CardFooter>
                 </form>
             </Card>
         </div>
