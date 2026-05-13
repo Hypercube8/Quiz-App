@@ -1,11 +1,16 @@
 import prisma from "./prisma";
 import { UIMessage } from "ai";
 
-export async function saveChat(messages: UIMessage[], id: string) {
+export async function saveChat(messages: UIMessage[], id: string, user: any) {
     const session = await prisma.chatSession.upsert({
         where: { id },
         update: {},
-        create: { id }
+        create: { 
+            id, 
+            user: {
+                connect: { id: user.id }
+            } 
+        }
     });
     if (!session) throw new Error("Session not found");
 

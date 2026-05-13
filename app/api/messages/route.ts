@@ -1,13 +1,33 @@
-import { NextResponse } from "next/server";
 import  prisma from "@/lib/prisma";
 
-export async function GET() {
-    try {
-        const messages = await prisma.chatMessage.findMany({
-            orderBy: { createdAt: "asc" }
-        });
+import { auth } from "@/lib/auth";
 
-        const uiMessages = messages.map((msg) => ({
+import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+
+export async function POST(req: Request) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized"}, {status: 401});
+    }
+
+    const { chatSessionId } = await req.json();
+    console.log(chatSessionId);
+
+    try {
+        const chatSession = await prisma.chatSession.findFirstOrThrow({
+            where: { userId: session.user.id, id: chatSessionId },
+            include: {
+                messages: {
+                    orderBy: { createdAt: "asc" }
+                }
+            }
+        })
+
+        const uiMessages = chatSession.messages.map((msg) => ({
             id: msg.id,
             role: msg.role.toLowerCase(),
             parts: JSON.parse(msg.content)

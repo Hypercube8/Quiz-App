@@ -1,61 +1,73 @@
-import { streamText, UIMessage, convertToModelMessages, tool } from "ai";
 import { saveChat } from "@/lib/save-chat";
+import { updateTokenUsage } from "@/lib/token-usage";
 
-import { z } from "zod";
+import { auth } from "@/lib/auth";
 
-const QuizOptionSchema = z.object({
-  id: z.string(),
-  text: z.string().min(1, "Option text is required"),
-});
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 
-const QuizQuestionSchema = z.object({
-  id: z.string(),
-  question: z.string().min(1, "Question is required"),
+import { 
+  streamText, 
+  UIMessage, 
+  convertToModelMessages, 
+  smoothStream,
+  stepCountIs,
+} from "ai";
 
-  options: z.array(QuizOptionSchema).min(2, "At least 2 options required"),
-
-  correctOptionId: z.string(),
-
-  explanation: z.string().optional(),
-}).refine(
-  (data) => data.options.some((opt) => opt.id === data.correctOptionId),
-  {
-    message: "correctOptionId must match one of the options",
-    path: ["correctOptionId"],
-  }
-);
-
-export const QuizSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1),
-  description: z.string().optional(),
-
-  questions: z.array(QuizQuestionSchema).min(1),
-});
+import { renameTool } from "@/lib/tools/rename";
+import { languageModelsIds } from "@/lib/models";
+import { quizTool } from "@/lib/tools/quiz";
 
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
-    const { messages, id }: { messages: UIMessage[]; id: string } = await req.json();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    }) 
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // if (session.user.tokensUsed >= session.user.tokensAvailable) {
+    //   return NextResponse.json({ error: "Not enough tokens" }, {status: 402});
+    // }
+
+    const { messages, id, model, toolParams }: { messages: UIMessage[]; id: string; model: string, toolParams: any } = await req.json();
+
+    if (!languageModelsIds.includes(model)) {
+      return NextResponse.json({ error: "Invalid model" }, {status: 400});
+    }
 
     const result = streamText({
-        model: "openai/gpt-4o",
+        model,
         messages: await convertToModelMessages(messages),
+        experimental_context: {
+          id,
+          toolParams
+        },
+        // providerOptions: {
+        //   openai: {
+        //     reasoningEffort: "high",
+        //     reasoningSummary: "detailed"
+        //   }
+        // },
+        experimental_transform: smoothStream({
+          delayInMs: 20,
+          chunking: "word"
+        }),
         tools: {
-            makeQuiz: tool({
-                description: "Create an interactive quiz",
-                inputSchema: QuizSchema,
-                execute: async (quiz: z.infer<typeof QuizSchema>) => {
-                    console.log(quiz);
-                }
-            })
-        }
+          rename: renameTool,
+          quiz: quizTool
+        },
+        stopWhen: stepCountIs(5),
     });
 
     return result.toUIMessageStreamResponse({
         originalMessages: messages,
+        sendReasoning: true,
         onFinish: async ({ messages }) => {
-            await saveChat(messages, id);
+            await saveChat(messages, id, session.user);
         }
     });
 }

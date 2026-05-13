@@ -39,9 +39,13 @@ model User {
   image         String?
   accounts      Account[]
 
+  tokensUsed    Int @default(0)
+  tokensAvailable Int @default(0)
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   sessions  Session[]
+  chatSessions ChatSession[]
 
   @@map("users")
 }
@@ -76,9 +80,14 @@ model Verification {
 
 model ChatSession {
   id String @id
+  name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   messages ChatMessage[]
+
+  userId    String 
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
 }
 
 model ChatMessage {
